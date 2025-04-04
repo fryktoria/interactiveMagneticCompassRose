@@ -18,6 +18,9 @@ Compass roses with the double protractors are printed with a magnetic declinatio
 What I wanted to create is a digital compass rose that can be set to a desired magnetic declination. This new rose could be used eventually for navigational training or any other publishing purpose.
 
 # How to use
+
+ Store the HTML file `interactiveMagneticCompassRose.html` in the file system of your computer, tablet or mobile phone. Open the file with any browser. The HTML file contains all information necessary to operate and does not rely to any additional files. Therefore, it can be opened and run, even without an internet connection. This feature is very helpful in case the user is at open seas or inside an airplane.
+ 
 The user may input the desired magnetic declination in the input box. The number format allows for number from `+0` to `+180` degrees to indicate an East magnetic declination, or from `-0` to `-180` for a West magnetic declination. Decimal digits can be used. **Please note that the decimal point should be a dot `.`**. Commas are not supported as decimal points since I have made the choice to avoid localization issues. The user may check the first informational line of the rose to see the corresponding deeclination value in degrees and minutes.
 
 The internal protractor which indicates the magnetic North is then rotated automatically to the desired declination and finally the image can be printed or transferred to a publication document.
@@ -28,11 +31,11 @@ The internal protractor presents also two informational lines:
  - The first line is set automatically to depict the set declination. This is shown with the indication `VAR`, followed by the declination in the common format used for maps, in degrees and minutes, accompanied by the symbols `E` for Eastern declination, or `W` for Western declination. Inside a parenthesis, the declination is also presented as a decimal number.
  -  The second line can be customised by the user, by inputting a text in the input box. The purpose of this line is to simulate the information about the change of the declination in the passage of time, such as `2003 ANNUAL INCREASE 4.2'` to indicate that the deviation value of the first line should be adjusted (increased or decreased) by the value in the second line, usually depicted in minutes of arc. In this example, if the year is 2005, the user should add 8.4 minutes to the declination of line 1.
  
- After the user sets the declination and optionally the information line 2, the data are stored in local storage, at a physical location depending on the browser. Please check the [Caveats] section for concerns regarding the informational lines.
+ After the user sets the declination and optionally the information line 2, the data are stored in local storage, at a physical location depending on the browser. Please check the [Caveats](#caveats) section for concerns regarding the informational lines.
  
  The user may increase or decrease the size of the compass rose, using the `Image size` buttons `+` and `-`.
  
- The HTML file contains all information necessary to operate and does not rely to any additional files. Therefore, it can be opened and run directly on any compatible browser, even without an internet connection. This feature is very helpful in case the user is at open seas or inside an airplane.
+
  
   
 
