@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <title>Compass</title>
 </head>
-<body>
+<body style="font-family: Verdana, sans-serif;">
 
 <div id="headerInfo">
 <h1>Interactive Magnetic Compass Rose</h1>
@@ -17,8 +17,8 @@
         overflow: visible;
     }
     .container svg {
-        width: 60%;
-        height: 60%;
+        width: 50%;
+        height: 50%;
     }
 </style>    
 <div id="svgDiv" class="container">   
@@ -30,11 +30,9 @@
 <!-- Modifications by Ilias Iliopoulos info@fryktoria.com detailed in READ.ME file at https://github.com/fryktoria/interactiveMagneticCompassRose  -->
 <svg 
 
-   version="1.0"
-   viewBox="0 0 1103 1163" 
-   width="1103"
-   height="1163"
+   version="1.0"    
    id="svgCompassRose"
+   viewBox="0 0 1103 1163"
    transform="scale(1)"
    sodipodi:docname="interactiveMagneticCompassRose.svg"
    inkscape:version="1.4 (86a8ad7, 2024-10-11)"
@@ -807,8 +805,6 @@
             
         }
     </style>
-
-
     
     <div class="line">    
       <button onclick="rotateLayer(-10);">-10</button>
@@ -828,7 +824,13 @@
       <label for="commentInput">Line 2:</label>
       <input type="text" id="commentInput" maxlength="30" size="32" placeholder="Set comment">
     </div>
-    
+ 
+    <div class="line">
+      Image size: 
+      <button onclick="setImageSize(-0.1);">-</button>
+      <button onclick="setImageSize(+0.1);">+</button>
+    </div>
+ 
     
     <script>
     
@@ -1094,12 +1096,8 @@
       */
       window.onload = function() {
   
-          deleteLocalStorage('rotation'); /* For debugging. Comment for normal operation */   
+          //deleteLocalStorage('rotation'); /* For debugging. Comment for normal operation */   
           //deleteLocalStorage('comment'); /* For debugging. Comment for normal operation */
-     
-          
- //   document.getElementById('svgCompassRose').setAttribute('width', '1000');
- //   document.getElementById('svgCompassRose').setAttribute('height', '1000');
 
           // Sets the declination to the value stored in local storage
           rotateLayer(1000); 
@@ -1113,6 +1111,37 @@
             setDeclinationInfo();
           }
           
+      }
+      
+      /*
+        Modifies the size of the compass rose by step%
+      */
+      function setImageSize(step) {
+      
+        var element = document.getElementById('svgCompassRose');
+        var computedStyle = window.getComputedStyle(element);
+        var computedStyle = window.getComputedStyle(element);
+        var currentWidth = parseFloat(computedStyle.width);
+        var currentHeight = parseFloat(computedStyle.height);
+        
+        var newWidth = currentWidth * (1 + parseFloat(step));
+        var newHeight = currentHeight * (1 + parseFloat(step));
+        debugPrint("Image size Width: " + newWidth + " Height: " + newHeight);
+        
+        /* Set some boundaries to avoid surprises */
+        if (newWidth < 57) {
+          newWidth = 57.01878;
+          newHeight = 60.13125;
+        } else if (newWidth > 1894){
+          newWidth = 1894.816;
+          newHeight = 1997.853;        
+        
+        }
+        
+        // Set the new width
+        element.style.setProperty('width', newWidth + 'px');
+        element.style.setProperty('height', newHeight + 'px');
+
       }
         
     </script>

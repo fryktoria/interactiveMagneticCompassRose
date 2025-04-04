@@ -28,6 +28,8 @@ The internal protractor presents also two informational lines:
  
  After the user sets the declination and optionally the information line 2, the data are stored in local storage, at a physical location depending on the browser. Please check the [Caveats] section for concerns regarding the informational lines.
  
+ The user may increase or decrease the size of the compass rose, using the `Image size` buttons `+` and `-`.
+ 
  The HTML file contains all information necessary to operate and does not rely to any additional files. Therefore, it can be opened and run directly on any compatible browser, even without an internet connection. This feature is very helpful in case the user is at open seas or inside an airplane.
  
   
