@@ -18,7 +18,7 @@ Compass roses with the double protractors are printed with a magnetic declinatio
 What I wanted to create is a digital compass rose that can be set to a desired magnetic declination. This new rose could be used eventually for navigational training or any other publishing purpose.
 
 # How to use
-The user may input the desired magnetic declination in the input box. The number format allows for number from `+0` to `+180` degrees to indicate an East magnetic declination, or from `-0` to `-180` for a West magnetic declination. Decimal digits can be used. **Please note that the decimal point should be a dot `.`**. I made this coice to avoid localization issues. The user may check the first informational line of the rose to see the corresponding deeclination value in degrees and minutes.
+The user may input the desired magnetic declination in the input box. The number format allows for number from `+0` to `+180` degrees to indicate an East magnetic declination, or from `-0` to `-180` for a West magnetic declination. Decimal digits can be used. **Please note that the decimal point should be a dot `.`**. Commas are not supported as decimal points since I have made the choice to avoid localization issues. The user may check the first informational line of the rose to see the corresponding deeclination value in degrees and minutes.
 
 The internal protractor which indicates the magnetic North is then rotated automatically to the desired declination and finally the image can be printed or transferred to a publication document.
 
