@@ -33,7 +33,7 @@ The internal protractor presents also two informational lines:
  
  After the user sets the declination and optionally the information line 2, the data are stored in local storage, at a physical location depending on the browser. Please check the [Caveats](#caveats) section for concerns regarding the informational lines.
  
- The user may increase or decrease the size of the compass rose, using the `Image size` buttons `+` and `-`.
+ The user may increase or decrease the size of the compass rose, using the `Image size` buttons `+` and `-`, as well as restore the image to the original size, using the `Default` button.
  
 
  

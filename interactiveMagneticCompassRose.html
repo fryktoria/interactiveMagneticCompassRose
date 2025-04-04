@@ -829,6 +829,7 @@
       Image size: 
       <button onclick="setImageSize(-0.1);">-</button>
       <button onclick="setImageSize(+0.1);">+</button>
+      <button onclick="setImageSizeToDefault();">Default</button>
     </div>
  
     
@@ -865,7 +866,23 @@
           Do not modify.
         */
         const initialPlateRotation = 4.25;
-        
+
+        /*
+          Default width and height of the SVG image, 
+          corresponding roughly to a setting of 30% of the original image 1103x1163
+        */
+        const defaultSvgWidth = 392.625;
+        const defaultSvgHeight = 413.9721;
+
+        /*
+          Maximum and minimum width and heightof the SVG image, 
+        */
+        const minSvgWidth = 57.01878;
+        const minSvgHeight = 60.13125;
+        const maxSvgWidth = 1894.816;
+        const maxSvgHeight = 1997.853;
+
+       
         /*
           The event listener to notice changes in the declination input box        
         */
@@ -1098,6 +1115,13 @@
   
           //deleteLocalStorage('rotation'); /* For debugging. Comment for normal operation */   
           //deleteLocalStorage('comment'); /* For debugging. Comment for normal operation */
+          //deleteLocalStorage('width'); /* For debugging. Comment for normal operation */
+          //deleteLocalStorage('height'); /* For debugging. Comment for normal operation */
+          
+          /*
+            Sets the size of the SVG as per the stored width and height
+          */          
+          setSavedImageSize();
 
           // Sets the declination to the value stored in local storage
           rotateLayer(1000); 
@@ -1129,19 +1153,52 @@
         debugPrint("Image size Width: " + newWidth + " Height: " + newHeight);
         
         /* Set some boundaries to avoid surprises */
-        if (newWidth < 57) {
-          newWidth = 57.01878;
-          newHeight = 60.13125;
-        } else if (newWidth > 1894){
-          newWidth = 1894.816;
-          newHeight = 1997.853;        
+        if (newWidth < Math.floor(minSvgWidth)) {
+          newWidth = minSvgWidth;
+          newHeight = minSvgHeight;
+        } else if (newWidth > Math.floor(maxSvgWidth)){
+          newWidth = maxSvgWidth;
+          newHeight = maxSvgHeight;        
         
         }
         
         // Set the new width
         element.style.setProperty('width', newWidth + 'px');
         element.style.setProperty('height', newHeight + 'px');
+        
+        // and store locally
+        debugPrint("Save to local storage Image size Width: " + newWidth + " Height: " + newHeight);
+        saveToLocalStorage('width', newWidth);
+        saveToLocalStorage('height', newHeight);
 
+      }
+
+      /*
+        Sets the initial size of the SVG image, using the stored
+        values of width and size
+      */
+      function setSavedImageSize() {
+        var element = document.getElementById('svgCompassRose');
+        savedWidth = loadFromLocalStorage('width');
+        savedHeight = loadFromLocalStorage('height');
+        if (savedWidth === null || savedHeight === null) {
+           debugPrint('failed to read width or height from local storage. Set to default');
+           element.style.setProperty('width', defaultSvgWidth + 'px');
+           element.style.setProperty('height', defaultSvgHeight + 'px');           
+           
+        } else {          
+          element.style.setProperty('width', savedWidth + 'px');
+          debugPrint('Setting width from local storage to ' + savedWidth);
+          element.style.setProperty('height', savedHeight + 'px');
+          debugPrint('Setting height from local storage to ' + savedHeight);
+        }     
+      }
+      
+      
+      function setImageSizeToDefault() {
+          deleteLocalStorage('width'); 
+          deleteLocalStorage('height');   
+          setSavedImageSize();     
       }
         
     </script>
