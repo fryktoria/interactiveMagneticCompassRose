@@ -1,6 +1,8 @@
 # interactiveMagneticCompassRose
 A nautical compass rose comprising of True and Magnetic North scales, allowing to change the magnetic declination
 
+![demo image](./image.png)
+
 # Introduction
 A **"compass rose"** or otherwise called a "wind rose" is mainly found in nautical charts and maps used for navigation purposes. The compass rose helped to plan a route by identifying the direction of travel. The navigator plotted a line from the current position to the destination or to a point of interest. Afterwards, he used a tool called ["biparallel"](https://en.wikipedia.org/wiki/Parallel_rulers) to transfer the line inside the compass rose, with the line passing through the center of the compass rose. He could then read the destination of travel directly on the compass rose. 
 
