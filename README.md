@@ -21,7 +21,11 @@ What I wanted to create is a digital compass rose that can be set to a desired m
 
  Store the HTML file `interactiveMagneticCompassRose.html` in the file system of your computer, tablet or mobile phone. Open the file with any browser. The HTML file contains all information necessary to operate and does not rely to any additional files. Therefore, it can be opened and run, even without an internet connection. This feature is very helpful in case the user is at open seas or inside an airplane.
  
-The user may input the desired magnetic declination in the input box. The number format allows for number from `+0` to `+180` degrees to indicate an East magnetic declination, or from `-0` to `-180` for a West magnetic declination. Decimal digits can be used. **Please note that the decimal point should be a dot `.`**. Commas are not supported as decimal points since I have made the choice to avoid localization issues. The user may check the first informational line of the rose to see the corresponding deeclination value in degrees and minutes.
+The user may input the desired magnetic declination in the input box. The number format allows for number from `+0` to `+180` degrees to indicate an East magnetic declination, or from `-0` to `-180` for a West magnetic declination. Decimal digits can be used. **Please note that the decimal point should be a dot `.`**. Commas are not supported as decimal points since I have made the choice to avoid localization issues. The user may check the first informational line of the rose to see the corresponding declination value in degrees and minutes. 
+
+If the user inputs a number higher than `+180`, the software automatically transforms the number to a negative declination, to present it as a West declination. Similarly, if the user inputs a number lower that `-180`, the software transforms to a positive number, as an East declination. 
+
+Adjustments are also implemented if the input is higher than `+360` or lower than `-360`. The numbers are transformed into the `-180` to `+180` range.
 
 The internal protractor which indicates the magnetic North is then rotated automatically to the desired declination and finally the image can be printed or transferred to a publication document.
 
@@ -35,17 +39,13 @@ The internal protractor presents also two informational lines:
  
  The user may increase or decrease the size of the compass rose, using the `Image size` buttons `+` and `-`, as well as restore the image to the original size, using the `Default` button.
  
-
- 
-  
-
  
 # Caveats
 The application is designed for local use. It is one single HTML page residing in a local folder of a computer. The informational lines, the declination and the line that can be set manually by the user, are stored locally using the [Javascript Local Storage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage). They are stored in unencrypted form and therefore **cannot be used for any personal or confidential data**. 
 
 The application does not exercise any control on the user input. Therefore, if the page is published on a web server, it may be prone to various types of attacks, giving control of the computer to malicious users. 
 
-***IT IS STRONGLY SUGGESTED NOT TO USE WITH A WEB SERVER. THE AUTHOR IS NOT RESPONSIBLE FOR ANY DAMAGES. PLEASE REFER TO THE LICENSE DOCUMENT.***
+***IT IS STRONGLY SUGGESTED NOT TO USE WITH A WEB SERVER. THE AUTHOR IS NOT RESPONSIBLE FOR ANY DAMAGES. PLEASE REFER TO THE [LICENSE](#licending] SECTION AND THE LICENSING DOCUMENT.***
 
 # Attributions 
 

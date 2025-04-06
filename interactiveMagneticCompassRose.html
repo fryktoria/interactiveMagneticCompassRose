@@ -8,6 +8,77 @@
 </head>
 <body style="font-family: Verdana, sans-serif;">
 
+
+<script>
+
+    /*
+      All variables that can be changed to affect visual appearance and performance are in this section       
+    */
+    
+    /*
+       Set to true to allow printing log messages to the browser console.
+       Set to false for normal operation
+    */   
+    const logtoConsole = false;
+  
+    /*
+     To simulate the case when the code runs for the first time on a specific computer and browser,
+     where nothing is stored in the local storage, set to true.
+     Must be set to false for normal operartion    
+    */
+     simulateFirstTimeRun = false;
+ 
+    /*
+      Flag to allow or not the appearance of a comment line in the magnetic compass disc
+    */
+    const allowCommentLine = true;
+ 
+    /*
+      Number of decimal digits showing degrees in the declination text (first information line)
+      in the numeric value inside the parenthesis.
+      Also in the declination input box.
+    */
+    const degreeResolution = 3;
+    /*
+      Number of decimal digits showing minutes in the declination text (first information line) 
+      in the degrees-minutes E/W part          
+    */
+    const minutesResolution = 3;    
+ 
+    /*
+      Remnant from the source of the initial SVG design, showing a compass with
+      declination 4 degrees 15 minutes West. I need to offset this 
+      in order to bring the compass to zero.
+      Do not modify.
+    */
+    const initialPlateRotation = 4.25;
+ 
+    /*
+      Default width and height of the SVG image, 
+      corresponding roughly to a setting of 30% of the original image 1103x1163
+    */
+    const defaultSvgWidth = 681.6375;
+    const defaultSvgHeight = 718.7058;
+ 
+    /*
+      Maximum and minimum width and heightof the SVG image, 
+    */
+    const minSvgWidth = 57.01878;
+    const minSvgHeight = 60.13125;
+    const maxSvgWidth = 1894.816;
+    const maxSvgHeight = 1997.853;
+ 
+    /*
+      The regular expression that defines the acceptable pattern for declination.
+      It allows for negative numbers.
+      It allows numbers with maximum 3 integer digits to represent degrees, and 
+      maximum number of decimal digits as set in constant degreeResolution
+    */        
+    const regexValidDeclination = new RegExp(`^[-+]?\\d{0,3}(\\.{1}\\d{0,${degreeResolution}}){0,1}$`);
+
+</script>
+
+
 <div id="headerInfo">
 <h1>Interactive Magnetic Compass Rose</h1>
 </div>
@@ -820,9 +891,34 @@
       <input type="number" id="declinationInput" step="0.01" min="-181" max="181" placeholder="0.000">
     </div>
     
-    <div class="line">
-      <label for="commentInput">Line 2:</label>
-      <input type="text" id="commentInput" maxlength="30" size="32" placeholder="Set comment">
+    <div class="line" id="commentInputContainer">
+    
+
+    <script>
+
+      if (allowCommentLine) {
+        // Create the label element
+        const label = document.createElement('label');
+        label.setAttribute('for', 'commentInput');
+        label.textContent = 'Line 2:';
+
+        // Create the input element
+        const input = document.createElement('input');
+        input.setAttribute('type', 'text');
+        input.setAttribute('id', 'commentInput');
+        input.setAttribute('maxlength', '30');
+        input.setAttribute('size', '32');
+        input.setAttribute('placeholder', 'Set comment');
+
+        // Append the elements to the container
+        const container = document.getElementById('commentInputContainer');
+        container.appendChild(label);
+        container.appendChild(input);
+      }  
+        
+    </script>
+
+
     </div>
  
     <div class="line">
@@ -833,374 +929,354 @@
     </div>
  
     
-    <script>
+    <script> 
     
-        /*
-           Set to true to allow printing log messages to the browser console.
-           Set to false for normal operation
-        */   
-        const logtoConsole = false;
-        /*
-          Number of decimal digits showing degrees in the declination text (first information line)
-          in the numeric value inside the parenthesis.
-          Also in the declination input box.
-        */
-        const degreeResolution = 3;
-        /*
-          Number of decimal digits showing minutes in the declination text (first information line) 
-          in the degrees-minutes E/W part          
-        */
-        const minutesResolution = 3;    
-
-
-        /*
-          Variable to hold the current declination value.Takes values from 0.0 to 359.999999...
-          Do not modify.
-        */
-        currentRotation = 0.0;
-        
-        /*
-          Remnant from the source of the initial SVG design, showing a compass with
-          declination 4 degrees 15 minutes West. I need to offset this 
-          in order to bring the compass to zero.
-          Do not modify.
-        */
-        const initialPlateRotation = 4.25;
-
-        /*
-          Default width and height of the SVG image, 
-          corresponding roughly to a setting of 30% of the original image 1103x1163
-        */
-        const defaultSvgWidth = 392.625;
-        const defaultSvgHeight = 413.9721;
-
-        /*
-          Maximum and minimum width and heightof the SVG image, 
-        */
-        const minSvgWidth = 57.01878;
-        const minSvgHeight = 60.13125;
-        const maxSvgWidth = 1894.816;
-        const maxSvgHeight = 1997.853;
-
-       
-        /*
-          The event listener to notice changes in the declination input box        
-        */
-        document.getElementById('declinationInput').addEventListener('input', function (e) {
-            let value = parseFloat(e.target.value);
-       
-            limitDecimalPoints(document.getElementById('declinationInput'), degreeResolution);
-
-            if (isNaN(value)) {
-              return;
-            }
-            if (value > 180.000) {
-                value = -sumFloat(360.000, -value);
-                //e.target.value = parseFloat(value).toFixed(degreeResolution);
-                e.target.value = value;
-            } else if (value <= -180.000 ) {
-                value = sumFloat(360.000, value);              
-                //e.target.value = parseFloat(value).toFixed(degreeResolution);
-                e.target.value = value;
-            }
-            
-            currentRotation = parseFloat(value).toFixed(degreeResolution);
-            rotateLayer(-1000);
-            
-        });
-
-        
-        /*
-          Limits the number of decimal points allowed in the declination input box
-        */
-        function limitDecimalPoints(inputElement, decimalPoints) {
-            const value = inputElement.value;
-            const regex = new RegExp(`^-?\\d*\\.?\\d{0,${decimalPoints}}$`);
-
-            if (!regex.test(value)) {
-                inputElement.value = parseFloat(value).toFixed(decimalPoints);
-            }
+    /*
+      Variable to hold the current declination value.Takes values from 0.0 to 359.999999...
+      Do not modify.
+    */
+    currentRotation = 0.0;
+    
+    
+    /*
+      The event listener to notice changes in the declination input box        
+    */
+    document.getElementById('declinationInput').addEventListener('input', function (e) {
+    
+        if (!validDeclinationInput(document.getElementById('declinationInput'), degreeResolution)) {
+          /* We cannot control the value here but only in the validDeclinationInput() to achieve the required effect.
+             Perhaps it has to do with the functionality of the type number element and the re-entry on change.
+          */
+          return;
         }
 
+        let value = parseFloat(e.target.value);
 
+        if (isNaN(value)) {
+          return;
+        }
+        
+        flag = false;
+        if (value >360 || value < -360) {
+          value = value % 360.0;
+          flag = true;
+        } else if (value > 180.000) {
+            value = -sumFloat(360.000, -value);
+            flag = true;
+        } else if (value <= -180.000 ) {
+            value = sumFloat(360.000, value);              
+            flag = true;
+        }
         /*
-          The event listener to notice changes in the informational input box        
+          Again for some peculiar reason, I can only change the value of the element
+          and continue to have the proper behaviour, if the new value is different that 
+          the current value. If I set "e.target.value = value" without the value having changed,
+          the cursor goes in the start of the box and things become messy.              
         */
+        if (flag)            
+           e.target.value = value;
+        
+        currentRotation = parseFloat(value).toFixed(degreeResolution);
+        rotateLayer(-1000);
+        
+    });
+
+    
+    /*
+      Checks the validity of the declination input, using a regular expression
+    */
+    function validDeclinationInput(inputElement, decimalPoints) {
+        let value = inputElement.value;
+        if (!regexValidDeclination.test(value)) {
+            /* The limitation must be set here and not in the listener function.
+               It is peculiar but works */
+            inputElement.value = value.slice(0, -1);
+            return false;
+        }
+        return true;
+    }
+
+          
+    /*
+      The event listener to notice changes in the informational input box        
+    */
+    if (allowCommentLine) {  
         document.getElementById('commentInput').addEventListener('input', function (e) {
           setDeclinationInfo(); 
           saveToLocalStorage('comment', document.getElementById('commentInput').value)
         });
+    } 
 
-
-      /*
-        This function rotates the layer. It works in three modes:
-          step is a normal value denoting degrees. 
-              Rotates from the current rotation by adding step degrees.
-              Used mainly with the increment/decrement buttons
-          1000
-              Sets the declination to the value stored in local storage.
-              In case a value has not been set, sets to 0 declination
-          -1000
-              Does not modify the declination from the . 
-              Used to support input from the input box                   
-      */      
-        function rotateLayer(step) {
-        
-            let newRotation = 0;
-                   
-            let savedRotation = loadFromLocalStorage('rotation');
-            if (isNaN(savedRotation) || savedRotation === null) {
-               newRotation = parseFloat(currentRotation);
-               debugPrint('failed to read local storage. Set to default');
-            } else {            
-              newRotation = parseFloat(savedRotation);
-              debugPrint('Setting from local storage to ' + newRotation);
-            }
-                 
-            if (step > 999.0) {
-              debugPrint('Applying absolute transformation from saved value');
-              currentRotation = newRotation;
-            } else if (step < -999.0) {
-              /* Use the same currentRotation, as set by  the number input*/
-              debugPrint('Applying transformation from input box');
-
-            } else {
-               debugPrint('Applying step transformation with step ' + step);
-               currentRotation = sumFloat(newRotation, step) % 360;
+    /*
+    This function rotates the layer. It works in three modes:
+      step is a normal value denoting degrees. 
+          Rotates from the current rotation by adding step degrees.
+          Used mainly with the increment/decrement buttons
+      1000
+          Sets the declination to the value stored in local storage.
+          In case a value has not been set, sets to 0 declination
+      -1000
+          Does not modify the declination from the . 
+          Used to support input from the input box                   
+    */      
+    function rotateLayer(step) {
+    
+        let newRotation = 0;
                
-               // To set the formated value -180 +180
-               document.getElementById('declinationInput').value = degrees180(currentRotation).toFixed(degreeResolution);
-            } 
-                
-            let newTransform ='rotate(' + sumFloat(currentRotation, initialPlateRotation) % 360 + ', 549.95297,590.39997)'; 
-            debugPrint(newTransform);
-                       
-            let svgDoc = document.getElementById('svgCompassRose');
-            let layer = svgDoc.getElementById('magneticCompassRose');            
-            layer.setAttribute('transform', newTransform);
-            
-            debugPrint('Setting local storage to '+ currentRotation.toString());
-
-            saveToLocalStorage('rotation', currentRotation.toString());
-            setDeclinationInfo();
-
+        let savedRotation = loadFromLocalStorage('rotation');
+        if (isNaN(savedRotation) || savedRotation === null) {
+            newRotation = parseFloat(currentRotation);
+            debugPrint('Failed to read local storage. Set to default');
+        } else {            
+            newRotation = parseFloat(savedRotation);
+            debugPrint('Setting from local storage to ' + newRotation);
         }
+             
+        if (step > 999.0) {
+            debugPrint('Applying absolute transformation from saved value');
+            currentRotation = newRotation;
+        } else if (step < -999.0) {
+            /* Use the same currentRotation, as set by  the number input*/
+            debugPrint('Applying transformation from input box');
 
-
-        /*
-          Resets the rotation to 0 
-        */
-        function resetMagnetic() {
-        
-          rotateLayer(-currentRotation);
-          document.getElementById('declinationInput').value = 0;
-        
-        }
-        
-  
-        function saveToLocalStorage(key, value) {
-            localStorage.setItem(key, value);
-            debugPrint('saveToLocalStorage() ' + "'" + key + "' '" + value + "'");
-
-        }
-
-        function loadFromLocalStorage(key) {
-            let storedValue = localStorage.getItem(key);
-            debugPrint('loadFromLocalStorage() ' + "'" + key + "' '" + storedValue + "'");
-            return storedValue;
-        }
-        
-        
-        function deleteLocalStorage(key) {
-          localStorage.removeItem(key);
-          debugPrint('deleteLocalStorage() ' + "'" + key + "'");
-        }
-        
-        
-        /*
-          Updates the first and second informational lines
-          Sets the declination to the first line
-          and the user input from the information input box on the second
-        */
-        function setDeclinationInfo() {
-            let svgDoc = document.getElementById('svgCompassRose');  
-            let declinationInfoTextElement = svgDoc.getElementById('declinationInfo');
-            let tspanElement = getTspan(declinationInfoTextElement);
-            tspanElement[0].textContent = "VAR " + decimalToDegreesMinutes(currentRotation, minutesResolution) + '(' + formatDegreesWithSign(currentRotation,degreeResolution) + '°)';
-            tspanElement[1].textContent = document.getElementById('commentInput').value;
-            
-        }        
-
-
-        /*
-          Identifies the name of the tspan element within an SVG text element.
-          This is an intracacy of Inkscape, which creates text within tspans, 
-          but the id of the tspan is modified by Inkscape on save.
-        */
-        function getTspan(textElement) {
-            let tspanElement = textElement.getElementsByTagName('tspan');
-            return tspanElement;  
-        }
-  
-        /*
-          A function to add degrees, avoiding the floating point arithmetic
-          of javascript, wgich created values such as 1.00000000001
-        */
-        function sumFloat(a, b) {
-            let result = (a*10000 + b*10000)/10000;
-            debugPrint('sumFloat = ' + result)
-            return (result.toFixed(degreeResolution));
-      
-        }
-
-    
-        /*
-          Transform a numeric value of degrees to a numeric value from -180 to +180
-        */
-        function degrees180(degrees) {
-            degrees = degrees % 360;
-            if (degrees > 180) {
-              degrees = -sumFloat(360, -degrees);
-            } else if (degrees <= -180) {
-              degrees = sumFloat(360, degrees);
-            }          
-            return parseFloat(degrees);
-        }
-    
-      
-        /*
-          Returns a string representing the formatted to degrees-minutes-E/W of a numeric value       
-        */
-        function decimalToDegreesMinutes(decimalDegree, numberOfMinutesDecimalDigits) {        
-          decimalDegree = degrees180(decimalDegree);
-          let direction = decimalDegree >=0 ? 'E' : 'W';
-          
-          // Calculate absolute degrees and minutes
-          let absoluteDegree = Math.abs(decimalDegree);
-          let degrees = Math.floor(absoluteDegree);
-          let minutes = sumFloat(absoluteDegree,  -degrees) * 60;
-          return `${degrees}°${minutes.toFixed(numberOfMinutesDecimalDigits)}' ${direction} `;
-        }
-
-
-      /*
-        Returns a string presenting degrees in the format +/- decimal degrees.
-        Input degrees from 0 to 360
-        Returns degrees from -180 to +180
-      */
-      function formatDegreesWithSign(degrees, decimalPlaces) {
-         // Determine the direction based on the sign of the decimal degree       
-         degrees = degrees180(degrees);
-         let sign = degrees >= 0 ?  '+' : ''; /* Negative number has already the minus sign */        
-         degrees = parseFloat(degrees).toFixed(decimalPlaces);         
-         return `${sign}${degrees}`;
-
-      }
-      
-         
-      /*
-        Prints a log message to the browser console, depending on the constant logtoConsole,
-        that is set at the beginning of the script
-      */
-      function debugPrint(text) {
-      
-        if (logtoConsole)
-           console.log(text);      
-      }
-
-      /*
-        Actions when the HTML page is loaded to the browser
-      */
-      window.onload = function() {
-  
-          //deleteLocalStorage('rotation'); /* For debugging. Comment for normal operation */   
-          //deleteLocalStorage('comment'); /* For debugging. Comment for normal operation */
-          //deleteLocalStorage('width'); /* For debugging. Comment for normal operation */
-          //deleteLocalStorage('height'); /* For debugging. Comment for normal operation */
-          
-          /*
-            Sets the size of the SVG as per the stored width and height
-          */          
-          setSavedImageSize();
-
-          // Sets the declination to the value stored in local storage
-          rotateLayer(1000); 
-
-          savedComment = loadFromLocalStorage('comment');
-          if (savedComment === null) {
-             debugPrint('failed to read comment from local storage. Set to default');
-          } else {          
-            document.getElementById('commentInput').value = savedComment;
-            debugPrint('Setting comment from local storage to ' + savedComment);
-            setDeclinationInfo();
-          }
-          
-      }
-      
-      /*
-        Modifies the size of the compass rose by step%
-      */
-      function setImageSize(step) {
-      
-        var element = document.getElementById('svgCompassRose');
-        var computedStyle = window.getComputedStyle(element);
-        var computedStyle = window.getComputedStyle(element);
-        var currentWidth = parseFloat(computedStyle.width);
-        var currentHeight = parseFloat(computedStyle.height);
-        
-        var newWidth = currentWidth * (1 + parseFloat(step));
-        var newHeight = currentHeight * (1 + parseFloat(step));
-        debugPrint("Image size Width: " + newWidth + " Height: " + newHeight);
-        
-        /* Set some boundaries to avoid surprises */
-        if (newWidth < Math.floor(minSvgWidth)) {
-          newWidth = minSvgWidth;
-          newHeight = minSvgHeight;
-        } else if (newWidth > Math.floor(maxSvgWidth)){
-          newWidth = maxSvgWidth;
-          newHeight = maxSvgHeight;        
-        
-        }
-        
-        // Set the new width
-        element.style.setProperty('width', newWidth + 'px');
-        element.style.setProperty('height', newHeight + 'px');
-        
-        // and store locally
-        debugPrint("Save to local storage Image size Width: " + newWidth + " Height: " + newHeight);
-        saveToLocalStorage('width', newWidth);
-        saveToLocalStorage('height', newHeight);
-
-      }
-
-      /*
-        Sets the initial size of the SVG image, using the stored
-        values of width and size
-      */
-      function setSavedImageSize() {
-        var element = document.getElementById('svgCompassRose');
-        savedWidth = loadFromLocalStorage('width');
-        savedHeight = loadFromLocalStorage('height');
-        if (savedWidth === null || savedHeight === null) {
-           debugPrint('failed to read width or height from local storage. Set to default');
-           element.style.setProperty('width', defaultSvgWidth + 'px');
-           element.style.setProperty('height', defaultSvgHeight + 'px');           
+        } else {
+            debugPrint('Applying step transformation with step ' + step);
+            currentRotation = sumFloat(newRotation, step) % 360;
            
-        } else {          
-          element.style.setProperty('width', savedWidth + 'px');
-          debugPrint('Setting width from local storage to ' + savedWidth);
-          element.style.setProperty('height', savedHeight + 'px');
-          debugPrint('Setting height from local storage to ' + savedHeight);
-        }     
-      }
-      
-      
-      function setImageSizeToDefault() {
-          deleteLocalStorage('width'); 
-          deleteLocalStorage('height');   
-          setSavedImageSize();     
-      }
+            // To set the formated value -180 +180
+            document.getElementById('declinationInput').value = degrees180(currentRotation).toFixed(degreeResolution);
+        } 
+            
+        let newTransform ='rotate(' + sumFloat(currentRotation, initialPlateRotation) % 360 + ', 549.95297,590.39997)'; 
+        debugPrint(newTransform);
+                   
+        let svgDoc = document.getElementById('svgCompassRose');
+        let layer = svgDoc.getElementById('magneticCompassRose');            
+        layer.setAttribute('transform', newTransform);
         
+        debugPrint('Setting local storage to '+ currentRotation.toString());
+
+        saveToLocalStorage('rotation', currentRotation.toString());
+        setDeclinationInfo();
+
+    }
+
+
+    /*
+      Resets the rotation to 0 
+    */
+    function resetMagnetic() {
+        rotateLayer(-currentRotation);
+        document.getElementById('declinationInput').value = 0;
+    }
+    
+
+    function saveToLocalStorage(key, value) {
+        localStorage.setItem(key, value);
+        debugPrint('saveToLocalStorage() ' + "'" + key + "' '" + value + "'");
+    }
+
+
+    function loadFromLocalStorage(key) {
+        let storedValue = localStorage.getItem(key);
+        debugPrint('loadFromLocalStorage() ' + "'" + key + "' '" + storedValue + "'");
+        return storedValue;
+    }
+    
+    
+    function deleteLocalStorage(key) {
+        localStorage.removeItem(key);
+        debugPrint('deleteLocalStorage() ' + "'" + key + "'");
+    }
+    
+    
+    /*
+      Updates the first and second informational lines
+      Sets the declination to the first line
+      and the user input from the information input box on the second
+    */
+    function setDeclinationInfo() {
+        let svgDoc = document.getElementById('svgCompassRose');  
+        let declinationInfoTextElement = svgDoc.getElementById('declinationInfo');
+        let tspanElement = getTspan(declinationInfoTextElement);
+        tspanElement[0].textContent = "VAR " + decimalToDegreesMinutes(currentRotation, minutesResolution) + '(' + formatDegreesWithSign(currentRotation,degreeResolution) + '°)';
+        if (allowCommentLine) {
+            tspanElement[1].textContent = document.getElementById('commentInput').value;
+        } else {
+            tspanElement[1].textContent = '';
+        }    
+    }        
+
+
+    /*
+      Identifies the name of the tspan element within an SVG text element.
+      This is an intracacy of Inkscape, which creates text within tspans, 
+      but the id of the tspan is modified by Inkscape on save.
+    */
+    function getTspan(textElement) {
+        let tspanElement = textElement.getElementsByTagName('tspan');
+        return tspanElement;  
+    }
+
+
+    /*
+      A function to add degrees, avoiding the floating point arithmetic
+      of javascript, wgich created values such as 1.00000000001
+    */
+    function sumFloat(a, b) {
+        let result = (a*10000 + b*10000)/10000;
+        debugPrint('sumFloat = ' + result)
+        return (result.toFixed(degreeResolution));
+    }
+
+
+    /*
+      Transform a numeric value of degrees to a numeric value from -180 to +180
+    */
+    function degrees180(degrees) {
+        degrees = degrees % 360;
+        if (degrees > 180) {
+          degrees = -sumFloat(360, -degrees);
+        } else if (degrees <= -180) {
+          degrees = sumFloat(360, degrees);
+        }          
+        return parseFloat(degrees);
+    }
+
+  
+    /*
+      Returns a string representing the formatted to degrees-minutes-E/W of a numeric value       
+    */
+    function decimalToDegreesMinutes(decimalDegree, numberOfMinutesDecimalDigits) {        
+        decimalDegree = degrees180(decimalDegree);
+        let direction = decimalDegree >=0 ? 'E' : 'W';
+      
+        // Calculate absolute degrees and minutes
+        let absoluteDegree = Math.abs(decimalDegree);
+        let degrees = Math.floor(absoluteDegree);
+        let minutes = sumFloat(absoluteDegree,  -degrees) * 60;
+        return `${degrees}°${minutes.toFixed(numberOfMinutesDecimalDigits)}' ${direction} `;
+    }
+
+
+    /*
+      Returns a string presenting degrees in the format +/- decimal degrees.
+      Input degrees from 0 to 360
+      Returns degrees from -180 to +180
+    */
+    function formatDegreesWithSign(degrees, decimalPlaces) {
+        // Determine the direction based on the sign of the decimal degree       
+        degrees = degrees180(degrees);
+        let sign = degrees >= 0 ?  '+' : ''; /* Negative number has already the minus sign */        
+        degrees = parseFloat(degrees).toFixed(decimalPlaces);         
+        return `${sign}${degrees}`;  
+    }
+    
+       
+    /*
+      Prints a log message to the browser console, depending on the constant logtoConsole,
+      that is set at the beginning of the script
+    */
+    function debugPrint(text) {    
+        if (logtoConsole)
+            console.log(text);      
+    }
+  
+    /*
+      Actions when the HTML page is loaded to the browser
+    */
+    window.onload = function() {
+  
+        /* For debugging to simulate first time run. Set simulateFirstTimeRun=false for normal operation */  
+        if (simulateFirstTimeRun) {
+            deleteLocalStorage('rotation'); /* For debugging to simulate first time run. Comment for normal operation */   
+            deleteLocalStorage('comment'); /* For debugging. Comment for normal operation */
+            deleteLocalStorage('width'); /* For debugging. Comment for normal operation */
+            deleteLocalStorage('height'); /* For debugging. Comment for normal operation */
+        }
+        
+        /*
+          Sets the size of the SVG as per the stored width and height
+        */          
+        setSavedImageSize();
+  
+        // Sets the declination to the value stored in local storage
+        rotateLayer(1000); 
+  
+        if (allowCommentLine) {
+            savedComment = loadFromLocalStorage('comment');
+            if (savedComment === null) {
+                debugPrint('failed to read comment from local storage. Set to default');
+            } else {          
+                document.getElementById('commentInput').value = savedComment;
+                debugPrint('Setting comment from local storage to ' + savedComment);
+                setDeclinationInfo();
+            }
+        }  
+    }
+
+    
+    /*
+      Modifies the size of the compass rose by step%
+    */
+    function setImageSize(step) {
+    
+      var element = document.getElementById('svgCompassRose');
+      var computedStyle = window.getComputedStyle(element);
+      var computedStyle = window.getComputedStyle(element);
+      var currentWidth = parseFloat(computedStyle.width);
+      var currentHeight = parseFloat(computedStyle.height);
+      
+      var newWidth = currentWidth * (1 + parseFloat(step));
+      var newHeight = currentHeight * (1 + parseFloat(step));
+      debugPrint("Image size Width: " + newWidth + " Height: " + newHeight);
+      
+      /* Set some boundaries to avoid surprises */
+      if (newWidth < Math.floor(minSvgWidth)) {
+        newWidth = minSvgWidth;
+        newHeight = minSvgHeight;
+      } else if (newWidth > Math.floor(maxSvgWidth)){
+        newWidth = maxSvgWidth;
+        newHeight = maxSvgHeight;              
+      }
+      
+      // Set the new width
+      element.style.setProperty('width', newWidth + 'px');
+      element.style.setProperty('height', newHeight + 'px');
+      
+      // and store locally
+      debugPrint("Save to local storage Image size Width: " + newWidth + " Height: " + newHeight);
+      saveToLocalStorage('width', newWidth);
+      saveToLocalStorage('height', newHeight);  
+    }
+  
+    /*
+      Sets the initial size of the SVG image, using the stored
+      values of width and size
+    */
+    function setSavedImageSize() {
+      var element = document.getElementById('svgCompassRose');
+      savedWidth = loadFromLocalStorage('width');
+      savedHeight = loadFromLocalStorage('height');
+      if (savedWidth === null || savedHeight === null) {
+         debugPrint('Failed to read width or height from local storage. Set to default');
+         element.style.setProperty('width', defaultSvgWidth + 'px');
+         element.style.setProperty('height', defaultSvgHeight + 'px');                    
+      } else {          
+        element.style.setProperty('width', savedWidth + 'px');
+        debugPrint('Setting width from local storage to ' + savedWidth);
+        element.style.setProperty('height', savedHeight + 'px');
+        debugPrint('Setting height from local storage to ' + savedHeight);
+      }     
+    }
+    
+    
+    function setImageSizeToDefault() {
+        deleteLocalStorage('width'); 
+        deleteLocalStorage('height');   
+        setSavedImageSize();     
+    }
+          
     </script>
 </body>
 </html>
